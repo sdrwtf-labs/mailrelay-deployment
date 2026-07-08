@@ -1,6 +1,6 @@
 services:
   mailrelay:
-    image: bokysan/docker-postfix:latest
+    image: boky/postfix:latest
     container_name: mailrelay
     restart: unless-stopped
     ports:
