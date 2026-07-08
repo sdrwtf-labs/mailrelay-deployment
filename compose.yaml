@@ -17,6 +17,7 @@ services:
       - RELAYHOST_PASSWORD=${SMTP_PASS}
       - RELAYHOST_USE_TLS=${RELAYHOST_USE_TLS:-yes}
       # Security and network settings
+      - ALLOW_EMPTY_SENDER_DOMAINS=true
       - POSTFIX_mynetworks=${POSTFIX_mynetworks}
 
       # Custom Postfix configuration (injected into main.cf)
