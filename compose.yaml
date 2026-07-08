@@ -17,10 +17,7 @@ services:
       - RELAYHOST_PASSWORD=${SMTP_PASS}
       - RELAYHOST_USE_TLS=${RELAYHOST_USE_TLS:-yes}
       # Security and network settings
-      - ALLOWED_SENDER_DOMAINS=${ALLOWED_SENDER_DOMAINS:-*}
       - POSTFIX_mynetworks=${POSTFIX_mynetworks}
-      - POSTFIX_smtpd_relay_restrictions=${POSTFIX_smtpd_relay_restrictions:-permit_mynetworks, reject_unauth_destination}
-      - POSTFIX_smtpd_tls_security_level=${POSTFIX_smtpd_tls_security_level:-none}
 
       # Custom Postfix configuration (injected into main.cf)
       - POSTFIX_sender_canonical_classes=envelope_sender, header_sender

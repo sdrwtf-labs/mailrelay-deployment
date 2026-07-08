@@ -10,4 +10,16 @@ echo "/From:.*/ REPLACE From: ${SENDER_ADDRESS}" > /etc/postfix/header_checks
 echo "Generating aliases database..."
 postalias lmdb:/etc/aliases
 
-echo "Postfix maps generated successfully."
+# Generate a self-signed certificate to support incoming TLS (like PMG does)
+echo "Generating self-signed certificate for local TLS..."
+openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
+  -subj "/CN=mailrelay.int.sdr.wtf" \
+  -keyout /etc/ssl/private/postfix-inbound.key \
+  -out /etc/ssl/certs/postfix-inbound.crt > /dev/null 2>&1
+
+# Apply Postfix overrides for TLS
+postconf -e "smtpd_tls_cert_file = /etc/ssl/certs/postfix-inbound.crt"
+postconf -e "smtpd_tls_key_file = /etc/ssl/private/postfix-inbound.key"
+postconf -e "smtpd_tls_security_level = may"
+
+echo "Postfix initialization complete."
