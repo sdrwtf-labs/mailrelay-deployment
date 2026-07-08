@@ -19,6 +19,7 @@ services:
       # Security and network settings
       - ALLOWED_SENDER_DOMAINS=${ALLOWED_SENDER_DOMAINS:-*}
       - POSTFIX_mynetworks=${POSTFIX_mynetworks}
+
       # Custom Postfix configuration (injected into main.cf)
       - POSTFIX_sender_canonical_classes=envelope_sender, header_sender
       - POSTFIX_sender_canonical_maps=regexp:/etc/postfix/sender_canonical
