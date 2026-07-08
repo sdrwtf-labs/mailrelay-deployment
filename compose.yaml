@@ -18,11 +18,11 @@ services:
       - RELAYHOST_USE_TLS=${RELAYHOST_USE_TLS:-yes}
       # Security and network settings
       - ALLOWED_SENDER_DOMAINS=${ALLOWED_SENDER_DOMAINS:-*}
-      - MYNETWORKS=${MYNETWORKS}
+      - POSTFIX_mynetworks=${POSTFIX_mynetworks}
       # Custom Postfix configuration (injected into main.cf)
       - POSTFIX_sender_canonical_classes=envelope_sender, header_sender
       - POSTFIX_sender_canonical_maps=regexp:/etc/postfix/sender_canonical
       - POSTFIX_smtp_header_checks=regexp:/etc/postfix/header_checks
     volumes:
       # The script is executed on container startup to generate the regex maps
-      - ./init.sh:/docker-init.db/init.sh:ro
+      - ./init.sh:/docker-init.d/init.sh:ro
