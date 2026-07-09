@@ -2,7 +2,8 @@
 # wrapper.sh: Pre-initialization script for mwader/postfix-relay
 
 echo "Installing openssl for certificate generation..."
-apk add --no-cache openssl > /dev/null
+apt-get update > /dev/null 2>&1
+apt-get install -y openssl > /dev/null 2>&1
 
 echo "Generating Postfix regex maps for ${SENDER_ADDRESS}..."
 echo "/.+/    ${SENDER_ADDRESS}" > /etc/postfix/sender_canonical
@@ -15,4 +16,4 @@ openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
   -out /etc/ssl/certs/postfix-inbound.crt > /dev/null 2>&1
 
 echo "Executing original postfix-relay entrypoint..."
-exec /root/run.sh
+exec /root/run
