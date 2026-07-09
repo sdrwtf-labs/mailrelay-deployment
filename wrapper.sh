@@ -1,8 +1,8 @@
 #!/bin/sh
-# wrapper.sh: Pre-initialization script for mwader/postfix-relay
 
 echo "Installing openssl for certificate generation..."
-apk add --no-cache openssl > /dev/null
+apt-get update > /dev/null 2>&1
+apt-get install -y --no-install-recommends openssl > /dev/null 2>&1
 
 echo "Configuring SASL authentication for upstream relay..."
 echo "[${SMTP_SERVER}]:${SMTP_PORT} ${SMTP_USER}:${SMTP_PASS}" > /etc/postfix/sasl_passwd
@@ -19,4 +19,4 @@ openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
   -out /etc/ssl/certs/postfix-inbound.crt > /dev/null 2>&1
 
 echo "Executing original postfix-relay entrypoint..."
-exec /root/run.sh
+exec /root/run
