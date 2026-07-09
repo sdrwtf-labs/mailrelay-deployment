@@ -4,34 +4,40 @@ services:
     container_name: mailrelay
     restart: unless-stopped
     ports:
-      - "25:25"
+      - "${HOST_PORT:-25}:25"
     dns:
-      - ${LOCAL_DNS:-1.1.1.1}
+      - ${LOCAL_DNS}
     command: ["/wrapper.sh"]
     environment:
       - TZ=${TZ:-Europe/Berlin}
 
-      # Variables for wrapper.sh
+      # Variables utilized by wrapper.sh
       - SENDER_ADDRESS=${SENDER_ADDRESS}
+      - SMTP_SERVER=${SMTP_SERVER}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
 
-      # Outbound Smarthost Configuration (mwader/postfix-relay specific)
-      - SMTP_SERVER=${RELAYHOST}
-      - SMTP_PORT=${RELAYPORT:-587}
-      - SMTP_USERNAME=${SMTP_USER}
-      - SMTP_PASSWORD=${SMTP_PASS}
+      # Outbound Smarthost Configuration (Native Postfix)
+      - POSTFIX_relayhost=[${SMTP_SERVER}]:${SMTP_PORT}
+      - POSTFIX_smtp_sasl_auth_enable=${POSTFIX_SMTP_SASL_AUTH_ENABLE:-yes}
+      - POSTFIX_smtp_sasl_password_maps=hash:/etc/postfix/sasl_passwd
+      - POSTFIX_smtp_sasl_security_options=${POSTFIX_SMTP_SASL_SECURITY_OPTIONS:-noanonymous}
+      - POSTFIX_smtp_tls_security_level=${POSTFIX_SMTP_TLS_SECURITY_LEVEL:-encrypt}
+      - POSTFIX_smtp_tls_note_starttls_offer=${POSTFIX_SMTP_TLS_NOTE_STARTTLS_OFFER:-yes}
 
-      # Postfix Overrides
+      # Network Security
       - POSTFIX_mynetworks=${POSTFIX_MYNETWORKS}
-      - POSTFIX_message_size_limit=0
+      - POSTFIX_message_size_limit=${POSTFIX_MESSAGE_SIZE_LIMIT:-0}
 
       # Sender Rewriting Configuration
-      - POSTFIX_sender_canonical_classes=envelope_sender, header_sender
+      - POSTFIX_sender_canonical_classes=${POSTFIX_SENDER_CANONICAL_CLASSES:-envelope_sender, header_sender}
       - POSTFIX_sender_canonical_maps=regexp:/etc/postfix/sender_canonical
       - POSTFIX_smtp_header_checks=regexp:/etc/postfix/header_checks
 
       # Inbound TLS Configuration
       - POSTFIX_smtpd_tls_cert_file=/etc/ssl/certs/postfix-inbound.crt
       - POSTFIX_smtpd_tls_key_file=/etc/ssl/private/postfix-inbound.key
-      - POSTFIX_smtpd_tls_security_level=may
+      - POSTFIX_smtpd_tls_security_level=${POSTFIX_SMTPD_TLS_SECURITY_LEVEL:-may}
     volumes:
       - ./wrapper.sh:/wrapper.sh:ro
