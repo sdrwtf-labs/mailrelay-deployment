@@ -1,29 +1,37 @@
 services:
   mailrelay:
-    image: boky/postfix:latest
+    image: mwader/postfix-relay:latest
     container_name: mailrelay
     restart: unless-stopped
     ports:
       - "25:25"
     dns:
       - ${LOCAL_DNS:-1.1.1.1}
+    command: ["/wrapper.sh"]
     environment:
       - TZ=${TZ:-Europe/Berlin}
-      # Variable for the init.sh script
-      - SENDER_ADDRESS=${SENDER_ADDRESS}
-      # Relay host configuration
-      - RELAYHOST=${RELAYHOST}
-      - RELAYHOST_USERNAME=${SMTP_USER}
-      - RELAYHOST_PASSWORD=${SMTP_PASS}
-      - RELAYHOST_USE_TLS=${RELAYHOST_USE_TLS:-yes}
-      # Security and network settings
-      - ALLOW_EMPTY_SENDER_DOMAINS=true
-      - POSTFIX_mynetworks=${POSTFIX_mynetworks}
 
-      # Custom Postfix configuration (injected into main.cf)
+      # Variables for wrapper.sh
+      - SENDER_ADDRESS=${SENDER_ADDRESS}
+
+      # Outbound Smarthost Configuration (mwader/postfix-relay specific)
+      - SMTP_SERVER=${RELAYHOST}
+      - SMTP_PORT=${RELAYPORT:-587}
+      - SMTP_USERNAME=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASS}
+
+      # Postfix Overrides
+      - POSTFIX_mynetworks=${POSTFIX_MYNETWORKS}
+      - POSTFIX_message_size_limit=0
+
+      # Sender Rewriting Configuration
       - POSTFIX_sender_canonical_classes=envelope_sender, header_sender
       - POSTFIX_sender_canonical_maps=regexp:/etc/postfix/sender_canonical
       - POSTFIX_smtp_header_checks=regexp:/etc/postfix/header_checks
+
+      # Inbound TLS Configuration
+      - POSTFIX_smtpd_tls_cert_file=/etc/ssl/certs/postfix-inbound.crt
+      - POSTFIX_smtpd_tls_key_file=/etc/ssl/private/postfix-inbound.key
+      - POSTFIX_smtpd_tls_security_level=may
     volumes:
-      # The script is executed on container startup to generate the regex maps
-      - ./init.sh:/docker-init.d/init.sh:ro
+      - ./wrapper.sh:/wrapper.sh:ro
